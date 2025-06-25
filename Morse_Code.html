@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morse Code Learner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Space Mono', monospace;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(120deg, #1e3c72, #2a5298);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .morse-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1rem;
+      max-width: 800px;
+      margin-bottom: 2rem;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    .morse-item {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .practice-area {
+      background: rgba(255,255,255,0.1);
+      padding: 2rem;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      outline: none;
+      animation: blinkBorder 1.5s infinite;
+    }
+    @keyframes blinkBorder {
+      0% { border-color: #ffc107; }
+      50% { border-color: #ff5733; }
+      100% { border-color: #ffc107; }
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #ffc107;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #0f0;
+    }
+    .watermark {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      opacity: 0.2;
+      font-size: 14px;
+      color: white;
+      pointer-events: none;
+    }
+    .toggle-dark {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 0.5rem 1rem;
+      background-color: #ffc107;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-dark" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <h1>Morse Code Learning App</h1>
+
+  <div class="morse-table" id="morseTable"></div>
+
+  <div class="practice-area">
+    <h2>Practice Encoding</h2>
+    <input type="text" id="userInput" placeholder="Enter text to convert to Morse code" />
+    <button onclick="convertToMorse()">Convert</button>
+    <div class="result" id="morseResult"></div>
+  </div>
+
+  <div class="practice-area">
+    <h2>Decode Morse Code</h2>
+    <input type="text" id="morseInput" placeholder="Enter Morse code to decode (use / for spaces)" />
+    <button onclick="decodeMorse()">Decode</button>
+    <div class="result" id="textResult"></div>
+  </div>
+  <button><a href="quiz.html" class="btn">Take the Quiz</a></button>
+
+  <div class="watermark">TSHmorse</div>
+
+  <script>
+    const morseCode = {
+      A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.',
+      G: '--.', H: '....', I: '..', J: '.---', K: '-.-', L: '.-..',
+      M: '--', N: '-.', O: '---', P: '.--.', Q: '--.-', R: '.-.',
+      S: '...', T: '-', U: '..-', V: '...-', W: '.--', X: '-..-',
+      Y: '-.--', Z: '--..',
+      1: '.----', 2: '..---', 3: '...--', 4: '....-', 5: '.....',
+      6: '-....', 7: '--...', 8: '---..', 9: '----.', 0: '-----'
+    };
+
+    const reverseMorse = Object.fromEntries(
+      Object.entries(morseCode).map(([k, v]) => [v, k])
+    );
+
+    const tableContainer = document.getElementById('morseTable');
+    for (const [char, code] of Object.entries(morseCode)) {
+      const div = document.createElement('div');
+      div.className = 'morse-item';
+      div.innerHTML = `<strong>${char}</strong><br>${code}`;
+      tableContainer.appendChild(div);
+    }
+
+    function convertToMorse() {
+      const input = document.getElementById('userInput').value.toUpperCase();
+      let result = '';
+      for (let char of input) {
+        if (morseCode[char]) {
+          result += morseCode[char] + ' ';
+        } else if (char === ' ') {
+          result += '/ ';
+        }
+      }
+      document.getElementById('morseResult').textContent = result.trim();
+    }
+
+    function decodeMorse() {
+      const input = document.getElementById('morseInput').value.trim();
+      const words = input.split(' / ');
+      let decoded = '';
+      for (let word of words) {
+        const letters = word.split(' ');
+        for (let letter of letters) {
+          decoded += reverseMorse[letter] || '?';
+        }
+        decoded += ' ';
+      }
+      document.getElementById('textResult').textContent = decoded.trim();
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      if (body.style.background.includes('linear-gradient')) {
+        body.style.background = '#fff';
+        body.style.color = '#000';
+      } else {
+        body.style.background = 'linear-gradient(120deg, #1e3c72, #2a5298)';
+        body.style.color = '#fff';
+      }
+    }
+  </script>
+</body>
+</html>
